@@ -12,11 +12,14 @@ Make sure your work is committed and pushed to your repository before submission
 Good luck!
 
 ## Task1
+## Senario
+we have given a payment service application which records set of operational observtions. Each record contains a timestamp, the service name, response time, CPU usage, memory usage, a log level, and a message.
+
 ## Operational Data Analysis
 the repository have data/service_data.json file where hte data is stored. which contains the records. The dataset contains 10 records, with one-minute intervals.
 
+## Task 2
 ## observations from the logs and metrics.
-
 ## normal behaviour
 the behaviour is normal when:
 - `2026-09-20T10:00:00` to `2026-09-20T10:04:00` 
@@ -58,6 +61,8 @@ These fields describe the event context and the outcome written to logs, rather 
 The `timestamp` field is ISO 8601 format and is recorded once per minute at 1-minute intervals, for example `2026-09-20T10:00:00` through `2026-09-20T10:09:00`.
 
 This provides a time-ordered sequence for the service's behaviour, allowing the data to be correlated across metric changes and log events. The timeline shows a stable baseline followed by a short anomalous period and then a return to normal behaviour.
+
+## Task 3
 ## 4. Anomaly detection findings 
 The repository’s detection logic checks whether the metrics exceed the configured thresholds and whether the log level indicates an error. 
 The anomalies detected are: 
@@ -74,9 +79,7 @@ The anomalies detected are:
    - memory: 91% 
    - log level: `ERROR` 
    - reason: `High response time`, `High CPU utilization`, `High memory utilization`, `Error log detected` 
-
-## Senario
-we have given a payment service application which records set of operational observtions. Each record contains a timestamp, the service name, response time, CPU usage, memory usage, a log level, and a message. 
+ 
 ## 5. Event-processing flow 
 The project uses a simple event-stream simulation made of these components: 
 - `Event/message`: the anomaly object created after detection 
