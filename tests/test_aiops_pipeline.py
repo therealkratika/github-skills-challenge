@@ -70,3 +70,18 @@ def test_consumer_receives_event():
     messages = consumer.consume()
 
     assert len(messages) == 1
+
+
+def test_pipeline_transports_anomaly_event_end_to_end():
+    result = run_pipeline("data/service_data.json")
+
+    assert result["records_processed"] == 10
+    assert len(result["anomalies_detected"]) == 2
+    assert len(result["events_consumed"]) == 2
+
+    for event in result["events_consumed"]:
+        assert event["type"] == "ANOMALY"
+        assert event["service"] == "payment-service"
+        assert event["timestamp"]
+        assert "reasons" in event
+        assert event["source"]["log_level"] in {"INFO", "ERROR"}
