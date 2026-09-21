@@ -59,6 +59,37 @@ These values are markedly above the normal baseline and match typical failure or
 
 Overall, the dataset shows a clear baseline pattern of healthy operation interrupted by a short spike in latency and resource exhaustion associated with timeout errors.
 
+## Anomaly Detection Review
+
+I used the repository’s provided `AnomalyDetector` and event pipeline to process the operational data and review the actual detection output. The pipeline successfully processed all 10 records in [data/service_data.json](data/service_data.json) and produced a readable anomaly report.
+
+### Detected anomalies
+The detection process flagged two observations as anomalous:
+
+1. `2026-09-20T10:05:00` — `payment-service`
+   - `response_time_ms`: 610
+   - `cpu_percent`: 75
+   - `memory_percent`: 70
+   - `log_level`: `ERROR`
+   - reason: `High response time`, `High CPU utilization`, `High memory utilization`, `Error log detected`
+
+2. `2026-09-20T10:06:00` — `payment-service`
+   - `response_time_ms`: 640
+   - `cpu_percent`: 94
+   - `memory_percent`: 91
+   - `log_level`: `ERROR`
+   - reason: `High response time`, `High CPU utilization`, `High memory utilization`, `Error log detected`
+
+These are the only records that exceed the configured thresholds for latency and resource usage and also include the `ERROR` log severity. The remaining records were not flagged.
+
+### Normal vs. anomalous observations
+Normal observations were correctly left unflagged, especially the steady-state records from `10:00` to `10:04` and from `10:07` to `10:09`, when response times remained in the ~120–150 ms band and CPU/memory stayed under the expected operating thresholds.
+
+The anomaly check did not incorrectly flag those normal events. The expected anomalies were detected, and no normal event was misclassified in the dataset reviewed.
+
+### Limitations / improvement
+One limitation is that the detector uses fixed thresholds (`response_time_ms > 500`, `cpu_percent > 80`, `memory_percent > 80`) and a single `ERROR` severity check. This is effective for this synthetic dataset, but it may miss or over-trigger on real workloads with different baselines or noisy telemetry. An improvement would be to compare against rolling baselines or service-specific thresholds rather than hard-coded values.
+
 ---
 
 &copy; 2025 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
