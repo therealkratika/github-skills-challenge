@@ -111,6 +111,36 @@ I executed the repository workflow and confirmed the following path:
 
 This confirms the anomaly can travel through the complete event-processing pipeline in the provided simulation.
 
+## Workflow Troubleshooting
+
+### 1) Wrong severity check in the anomaly detector
+- Affected component: `AnomalyDetector`
+- Cause: the detector was checking `log_level == "WARNING"` instead of the actual error severity, `"ERROR"`.
+- Correction: changed the condition to detect `ERROR` events and included the error reason in the anomaly payload.
+- Re-run: executed the detector against the operational records.
+- Verification: the timeout records were correctly flagged as anomalies with the expected `Error log detected` reason.
+
+### 2) Topic mismatch in the event pipeline
+- Affected component: `AIOps pipeline` / `EventProducer` / `EventConsumer`
+- Cause: the producer published to `service-events`, but the consumer read from `anomaly-events`, so events were created but not consumed.
+- Correction: aligned the producer and consumer to the same topic: `anomaly-events`.
+- Re-run: executed the pipeline on the dataset.
+- Verification: `Events consumed: 2` matched `Anomalies detected: 2`.
+
+### 3) Import failures when running modules as scripts
+- Affected component: `src.aiops_pipeline`, `event_producer`, `event_consumer`
+- Cause: imports used package-unsafe absolute imports that failed when run directly as scripts.
+- Correction: added a safe fallback import pattern and package initialization (`src/__init__.py`).
+- Re-run: executed `python -m src.aiops_pipeline`.
+- Verification: the workflow ran successfully without `ModuleNotFoundError`.
+
+### 4) End-to-end data flow validation
+- Affected component: complete AIOps event path
+- Cause: the above issues prevented the full detection and event propagation flow from working reliably.
+- Correction: all earlier fixes were applied together and the pipeline was re-run.
+- Re-run: executed the full project test suite and pipeline.
+- Verification: `9 passed in 0.02s` and the pipeline reported `Anomalies detected: 2` with `Events consumed: 2`.
+
 ---
 
 &copy; 2025 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
